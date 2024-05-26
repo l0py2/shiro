@@ -1,4 +1,5 @@
-SRC := main.c
+SRC := main.c cgiutils.c
+HEADERS := cgiutils.h
 OBJ := ${SRC:.c=.o}
 OUT := shiro.cgi
 TEMPLATES := templates
@@ -18,7 +19,7 @@ install:
 uninstall:
 	@rm -rf ${INSTALL_OUT}/${OUT} ${INSTALL_OUT}/${TEMPLATES}
 
-${OBJ}:
+${OBJ}: ${HEADERS}
 
 ${OUT}: ${OBJ}
 	${CC} ${CFLAGS} ${LDLIBS} -o $@ $^
