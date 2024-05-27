@@ -1,10 +1,10 @@
-SRC := main.c cgiutils.c
-HEADERS := cgiutils.h
+SRC := main.c cgiutils.c input.c elements.c
+HEADERS := cgiutils.h input.h elements.h
 OBJ := ${SRC:.c=.o}
 OUT := shiro.cgi
 TEMPLATES := templates
 INSTALL_OUT := /srv/http/cgi-bin
-CFLAGS := -Wall
+CFLAGS := -Wall -std=c17
 LDLIBS := `pkg-config --libs sqlite3`
 
 all: ${OUT}

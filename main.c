@@ -5,20 +5,19 @@
 #include <unistd.h>
 
 #include "cgiutils.h"
+#include "input.h"
+#include "elements.h"
 
 #define DATABASE_PATH "/srv/db/anime.db"
 #define MAIN_TEMPLATE "templates/main.html"
 
 void handle_get(sqlite3* database);
 void handle_post(sqlite3* database);
+void handle_addition(sqlite3* database, char* input);
+void handle_update(sqlite3* database, char* input);
+void handle_delete(sqlite3* database, char* input);
 
-void extract_parameters(int* limit, int* page);
-void extract_input(char* input, char* name, int* rating);
-
-void print_limit_element(int limit);
-void print_page_element(int page);
-
-void print_table(sqlite3* database, int limit, int page);
+const int anime_name_size = 128;
 
 int main(void) {
 	sqlite3* database;
@@ -105,18 +104,24 @@ void handle_post(sqlite3* database) {
 
 	const int content_length = atoi(content_length_str) + 1;
 
-	char buff[content_length];
+	char input[content_length];
 
-	fgets(buff, content_length, stdin);
+	fgets(input, content_length, stdin);
 
-	const int name_size = 64;
+	if(strstr(input, "action=save")) {
+		handle_update(database, input);
+	}else if(strstr(input, "action=delete")) {
+		handle_delete(database, input);
+	}else {
+		handle_addition(database, input);
+	}
+}
 
-	char name[name_size];
+void handle_addition(sqlite3* database, char* input) {
+	char name[anime_name_size];
 	int rating = 1;
 
-	extract_input(buff, name, &rating);
-
-	const char* script_name = getenv("SCRIPT_NAME");
+	extract_input(input, name, &rating);
 
 	int result;
 	sqlite3_stmt* query;
@@ -126,7 +131,7 @@ void handle_post(sqlite3* database) {
 	if(result != SQLITE_OK) {
 		sqlite3_finalize(query);
 
-		server_error("1");
+		server_error("Error on query creation");
 
 		return;
 	}
@@ -163,101 +168,113 @@ void handle_post(sqlite3* database) {
 
 	sqlite3_finalize(query);
 
-	redirect(script_name);
+	redirect_itself();
 }
 
-void extract_parameters(int* limit, int* page) {
-	char* query_str = getenv("QUERY_STRING");
+void handle_update(sqlite3* database, char* input) {
+	int id;
+	char name[anime_name_size];
+	int rating;
 
-	if(!query_str)
-		return;
+	extract_update_input(input, &id, name, &rating);
 
-	char* token = strtok(query_str, "&");
-
-	while(token) {
-		sscanf(token, "limit=%d", limit);
-		sscanf(token, "page=%d", page);
-
-		token = strtok(NULL, "&");
-	}
-}
-
-void extract_input(char* input, char* name, int* rating) {
-	char* token = strtok(input, "&");
-
-	while(token) {
-		sscanf(token, "name=%s", name);
-		sscanf(token, "rating=%d", rating);
-
-		token = strtok(NULL, "&");
-	}
-}
-
-void print_limit_element(int limit) {
-	printf(
-		"<label>Limit: "
-		"<input value=\"%d\" name=\"limit\" type=\"number\"/>"
-		"</label>",
-		limit
-	);
-}
-
-void print_page_element(int page) {
-	printf(
-		"<label>Page: "
-		"<input value=\"%d\" name=\"page\" type=\"number\"/>"
-		"</label>",
-		page
-	);
-}
-
-void print_table(sqlite3* database, int limit, int page) {
 	int result;
 	sqlite3_stmt* query;
 
-	result = sqlite3_prepare_v2(database, "SELECT id, name, rating FROM anime LIMIT ?1 OFFSET ?2", -1, &query, NULL);
+	result = sqlite3_prepare_v2(database, "UPDATE anime SET name=?1, rating=?2 WHERE id = ?3", -1, &query, NULL);
 
 	if(result != SQLITE_OK) {
 		sqlite3_finalize(query);
 
+		server_error("Error on query creation");
+
 		return;
 	}
 
-	result = sqlite3_bind_int(query, 1, limit);
+	result = sqlite3_bind_text(query, 1, name, -1, SQLITE_STATIC);
 
 	if(result != SQLITE_OK) {
 		sqlite3_finalize(query);
 
+		server_error("Error on query binding");
+
 		return;
 	}
 
-	result = sqlite3_bind_int(query, 2, (page - 1) * limit);
+	result = sqlite3_bind_int(query, 2, rating);
 
 	if(result != SQLITE_OK) {
 		sqlite3_finalize(query);
 
+		server_error("Error on query binding");
+
 		return;
 	}
 
-	printf(
-		"<table>"
-		"<tr>"
-		"<th>ID</th>"
-		"<th>Name</th>"
-		"<th>Rating</th>"
-		"</tr>"
-	);
+	result = sqlite3_bind_int(query, 3, id);
 
-	while(sqlite3_step(query) == SQLITE_ROW) {
-		printf(
-			"<tr><td>%d</td><td>%s</td><td>%d</td></tr>",
-			sqlite3_column_int(query, 0),
-			sqlite3_column_text(query, 1),
-			sqlite3_column_int(query, 2)
-		);
+	if(result != SQLITE_OK) {
+		sqlite3_finalize(query);
+
+		server_error("Error on query binding");
+
+		return;
 	}
 
-	printf("</table>");
+	result = sqlite3_step(query);
+
+	if(result != SQLITE_DONE) {
+		sqlite3_finalize(query);
+
+		server_error("Error on query execution");
+
+		return;
+	}
 
 	sqlite3_finalize(query);
+
+	redirect_itself();
+}
+
+void handle_delete(sqlite3* database, char* input) {
+	int id;
+
+	extract_delete_input(input, &id);
+
+	int result;
+	sqlite3_stmt* query;
+
+	result = sqlite3_prepare_v2(database, "DELETE FROM anime WHERE id = ?1", -1, &query, NULL);
+
+	if(result != SQLITE_OK) {
+		sqlite3_finalize(query);
+
+		server_error("Error on query creation");
+
+		return;
+	}
+
+	result = sqlite3_bind_int(query, 1, id);
+
+	if(result != SQLITE_OK) {
+		sqlite3_finalize(query);
+
+		server_error("Error on query binding");
+
+		return;
+	}
+
+	result = sqlite3_step(query);
+
+	if(result != SQLITE_DONE) {
+		sqlite3_finalize(query);
+
+		server_error("Error on query execution");
+
+		return;
+	}
+
+	sqlite3_finalize(query);
+
+	redirect_itself();
 }
