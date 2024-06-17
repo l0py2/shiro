@@ -1,0 +1,80 @@
+:root {
+	--fg-color: #4c3e3e;
+	--bg-color: #ecf7fb;
+	--h-color: #cd80ea;
+	--h-bg-color: #c2f4fa;
+}
+
+*, ::before, ::after {
+	box-sizing: border-box;
+	padding: 0;
+	border: none;
+	margin: 0;
+	color: inherit;
+	font-family: inherit;
+}
+
+html {
+	font-size: 16px;
+	font-family: sans-serif;
+}
+
+body {
+	color: var(--fg-color);
+	background-color: var(--bg-color);
+}
+
+h1 {
+	text-align: center;
+	text-shadow: var(--h-color) 2px 2px 1px;
+	border-bottom: 4px solid var(--h-color);
+	margin-bottom: 32px;
+}
+
+input, select, button {
+	padding: 2px 4px;
+}
+
+fieldset {
+	padding: 8px;
+	border: 4px solid var(--h-bg-color);
+}
+
+legend {
+	background-color: var(--h-bg-color);
+	padding: 2px 4px;
+}
+
+main {
+	padding: 0 4rem;
+}
+
+main > form {
+	margin-bottom: 16px;
+}
+
+table {
+	width: 100%;
+	border-collapse: collapse;
+	text-align: left;
+}
+
+table input {
+	width: 100%;
+}
+
+thead {
+	border-bottom: 4px solid var(--h-color);
+}
+
+th {
+	border-left: 4px solid var(--h-color);
+}
+
+th, td {
+	padding: 4px;
+}
+
+tbody tr:nth-child(odd) {
+	background-color: var(--h-bg-color);
+}

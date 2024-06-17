@@ -6,7 +6,7 @@
 void print_limit_element(int limit) {
 	printf(
 		"<label>Limit: "
-		"<input value=\"%d\" name=\"limit\" type=\"number\"/>"
+		"<input value=\"%d\" name=\"limit\" type=\"number\" min=\"1\"/>"
 		"</label>",
 		limit
 	);
@@ -15,7 +15,7 @@ void print_limit_element(int limit) {
 void print_page_element(int page) {
 	printf(
 		"<label>Page: "
-		"<input value=\"%d\" name=\"page\" type=\"number\"/>"
+		"<input value=\"%d\" name=\"page\" type=\"number\" min=\"1\"/>"
 		"</label>",
 		page
 	);
@@ -49,22 +49,12 @@ void print_table(sqlite3* database, int limit, int page) {
 		return;
 	}
 
-	printf(
-		"<table>"
-		"<tr>"
-		"<th>ID</th>"
-		"<th>Name</th>"
-		"<th>Rating</th>"
-		"<th>Actions</th>"
-		"</tr>"
-	);
-
 	while(sqlite3_step(query) == SQLITE_ROW)
 		printf(
 			"<tr>"
-			"<td><input value=\"%d\" name=\"id\" form=\"form-%d\" type=\"number\" readonly/></td>"
+			"<td><input value=\"%d\" name=\"id\" form=\"form-%d\" readonly/></td>"
 			"<td><input value=\"%s\" name=\"name\" form=\"form-%d\" required/></td>"
-			"<td><input value=\"%d\" name=\"rating\" form=\"form-%d\" min=\"1\" max=\"10\" required/></td>"
+			"<td><input value=\"%d\" name=\"rating\" type=\"number\" form=\"form-%d\" min=\"1\" max=\"10\" required/></td>"
 			"<td>"
 			"<form method=\"post\" id=\"form-%d\">"
 			"<select name=\"action\"><option value=\"save\" selected>Save</option><option value=\"delete\">Delete</option></select>"
@@ -77,8 +67,6 @@ void print_table(sqlite3* database, int limit, int page) {
 			sqlite3_column_int(query, 2), sqlite3_column_int(query, 0),
 			sqlite3_column_int(query, 0)
 		);
-
-	printf("</table>");
 
 	sqlite3_finalize(query);
 }
