@@ -1,9 +1,9 @@
-SRC := main.c cgiutils.c input.c elements.c
-HEADERS := cgiutils.h input.h elements.h
+SRC := main.c cgiutils.c input.c elements.c handles.c
+HEADERS := cgiutils.h input.h elements.h handles.h
 OBJ := ${SRC:.c=.o}
 OUT := shiro.cgi
 TEMPLATES := templates
-INSTALL_OUT := /srv/http/cgi-bin
+HTTP_SRV := /srv/http
 CFLAGS := -Wall -std=c17
 LDLIBS := `pkg-config --libs sqlite3`
 
@@ -13,13 +13,15 @@ clean:
 	@rm -f ${OUT} ${OBJ}
 
 install:
-	@cp -f ${OUT} ${INSTALL_OUT}
-	@cp -rfT ${TEMPLATES} ${INSTALL_OUT}/${TEMPLATES}
+	@cp -f ${OUT} ${HTTP_SRV}/${OUT}
+	@cp -rfT ${TEMPLATES} ${HTTP_SRV}/${TEMPLATES}
 
 uninstall:
-	@rm -rf ${INSTALL_OUT}/${OUT} ${INSTALL_OUT}/${TEMPLATES}
+	@rm -rf ${HTTP_SRV}/${OUT} ${HTTP_SRV}/${TEMPLATES}
 
 ${OBJ}: ${HEADERS}
 
 ${OUT}: ${OBJ}
 	${CC} ${CFLAGS} ${LDLIBS} -o $@ $^
+
+.PHONY: all clean install uninstall
