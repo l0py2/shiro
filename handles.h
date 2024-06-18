@@ -5,8 +5,6 @@
 
 #include <sqlite3.h>
 
-static const int anime_name_size = 128;
-
 void handle_get(sqlite3* database);
 void handle_post(sqlite3* database);
 void handle_addition(sqlite3* database, char* input);

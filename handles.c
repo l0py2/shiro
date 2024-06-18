@@ -8,6 +8,7 @@
 #include "cgiutils.h"
 #include "input.h"
 #include "elements.h"
+#include "database.h"
 
 void handle_get(sqlite3* database) {
 	FILE* template = fopen(MAIN_TEMPLATE, "r");
@@ -71,7 +72,7 @@ void handle_post(sqlite3* database) {
 }
 
 void handle_addition(sqlite3* database, char* input) {
-	char name[anime_name_size];
+	char name[name_size + 1];
 	int rating = 1;
 
 	extract_input(input, name, &rating);
@@ -126,7 +127,7 @@ void handle_addition(sqlite3* database, char* input) {
 
 void handle_update(sqlite3* database, char* input) {
 	int id;
-	char name[anime_name_size];
+	char name[name_size + 1];
 	int rating;
 
 	extract_update_input(input, &id, name, &rating);

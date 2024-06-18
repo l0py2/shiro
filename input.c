@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "database.h"
+
 void decode_spaces(char* str) {
 	const int str_length = strlen(str);
 
@@ -32,7 +34,7 @@ void extract_input(char* input, char* name, int* rating) {
 	char* token = strtok(input, "&");
 
 	while(token) {
-		sscanf(token, "name=%s", name);
+		sscanf(token, "name=%128s", name);
 		sscanf(token, "rating=%d", rating);
 
 		token = strtok(NULL, "&");
@@ -46,7 +48,7 @@ void extract_update_input(char* input, int* id, char* name, int* rating) {
 
 	while(token) {
 		sscanf(token, "id=%d", id);
-		sscanf(token, "name=%s", name);
+		sscanf(token, "name=%128s", name);
 		sscanf(token, "rating=%d", rating);
 
 		token = strtok(NULL, "&");

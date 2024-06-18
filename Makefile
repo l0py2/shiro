@@ -1,5 +1,5 @@
-SRC := main.c cgiutils.c input.c elements.c handles.c
-HEADERS := cgiutils.h input.h elements.h handles.h
+SRC := main.c cgiutils.c input.c elements.c handles.c database.c
+HEADERS := cgiutils.h input.h elements.h handles.h database.h
 OBJ := ${SRC:.c=.o}
 OUT := shiro.cgi
 TEMPLATES := templates

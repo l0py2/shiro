@@ -53,7 +53,7 @@ void print_table(sqlite3* database, int limit, int page) {
 		printf(
 			"<tr>"
 			"<td><input value=\"%d\" name=\"id\" form=\"form-%d\" readonly/></td>"
-			"<td><input value=\"%s\" name=\"name\" form=\"form-%d\" required/></td>"
+			"<td><input value=\"%s\" name=\"name\" form=\"form-%d\" maxlength=\"128\" required/></td>"
 			"<td><input value=\"%d\" name=\"rating\" type=\"number\" form=\"form-%d\" min=\"1\" max=\"10\" required/></td>"
 			"<td>"
 			"<form method=\"post\" id=\"form-%d\">"
